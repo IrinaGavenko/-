@@ -1,130 +1,61 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <string>
+
 using namespace std;
 
-class Treap
+vector<int> zFunction(string & s)
 {
-public:
-
-	int key;
-	int priority;
-	Treap* left;
-	Treap* right;
-
-	Treap(int _x = 0, int _y = 0)
+	int n = s.length();
+	vector<int> z(n, 0);
+	z[0] = n;
+	int l = 0, r = 0;
+	int j;
+	for (int i = 1; i < n; i++)
 	{
-		key = _x;
-		priority = _y;
-		left = NULL;
-		right = NULL;
-	}
-};
-
-void split(Treap* T, int x, Treap* & L, Treap* & R)
-{
-	if (T == NULL)
-	{
-		L = NULL;
-		R = NULL;
-	}
-	else if (T->key < x)
-	{
-		split(T->right, x, T->right, R);
-		L = T;
-	}
-	else
-	{
-		split(T->left, x, L, T->left);
-		R = T;
-	}
-}
-
-void merge(Treap* L, Treap* R, Treap* & T)
-{
-	if (L == NULL || R == NULL)
-		if (!L)
-			T = R;
-		else
-			T = L;
-	else if (L->priority > R->priority)
-	{
-		merge(L->right, R, L->right);
-		T = L;
-	}
-	else
-	{
-		merge(L, R->left, R->left);
-		T = R;
-	}
-}
-
-int find(Treap* T, int x)
-{
-	if (T->key == x)
-		return T->key;
-	else if (T->key > x)
-	{
-		if (T->left == NULL)
-			return T->key;
+		if (i > r)
+		{
+			for (j = 0; ((j + i) < n) && (s[i + j] == s[j]); j++);
+			z[i] = j;
+			l = i;
+			r = (i + j - 1);
+		}
 		else
 		{
-			int answer = find(T->left, x);
-			if (answer == -1)
-				return T->key;
+			if (z[i - l] < (r - i + 1))
+				z[i] = z[i - l];
 			else
-				return answer;
+			{
+				for (j = 1; ((j + r) < n) && (s[r + j] == s[r - i + j]); j++);
+				z[i] = (r - i + j);
+				l = i;
+				r = (r + j - 1);
+			}
 		}
 	}
-	else
-	{
-		if (T->right == NULL)
-			return -1;
-		return find(T->right, x);
-	}
+	return z;
+}
+vector<int> aFunction(string & s)
+{
+	string _str = s;
+	reverse(_str.begin(), _str.end());
+	_str = s + _str;
+	vector<int> z = zFunction(_str);
+	reverse(z.begin(), z.end());
+	z.erase(z.begin() + s.size(), z.end());
+	return z;
 }
 
-void insert(Treap* & T, int x)
-{
-	Treap* L = NULL; Treap* L2 = NULL; Treap* L3 = NULL; Treap* R = NULL;
-	Treap* _element = new Treap(x, rand());
-	split(T, x, L, R);
-	merge(L, _element, L2);
-	merge(L2, R, L3);
-	T = L3;
-}
 
 int main()
 {
 	int n;
 	cin >> n;
-
-	int key;
-	char comand;
-	char last_comand = '+';
-	int last_value = 0;
-
-	Treap* T = new Treap;
-
-	for (int i = 0; i < n; i++)
-	{
-		cin >> comand;
-		if (comand == '+')
-		{
-			cin >> key;
-			if (last_comand == '+')
-				insert(T, key);
-			else
-				insert(T, (key + last_value) % 1000000000);
-			last_comand = '+';
-		}
-		else
-		{
-			last_comand = '?';
-			cin >> key;
-			int answer = find(T, key);
-			last_value = answer;
-			cout << answer << endl;
-		}
-	}
+	string s;
+	cin >> s;
+	vector<int> z = aFunction(s);
+	for (int i = 0; i < n; ++i)
+		cout << z[i] << ' ';
 	return 0;
 }
